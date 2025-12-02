@@ -1,0 +1,33 @@
+<!-- Sudoku -->
+<!DOCTYPE html>
+<html>
+<head>
+<title>Sudoku</title>
+<style>
+body { font-family: Arial; text-align:center; }
+table { margin:auto; border-collapse:collapse; }
+td { border:1px solid #000; width:40px; height:40px; }
+input { width:38px; height:38px; font-size:20px; text-align:center; }
+</style>
+</head>
+<body>
+<h2>Sudoku</h2>
+<table id="grid"></table>
+<button onclick="solveSudoku()">Solve</button>
+<script>
+let grid=document.getElementById('grid');
+for(let r=0;r<9;r++){
+let row=document.createElement('tr');
+for(let c=0;c<9;c++){
+let cell=document.createElement('td');
+let inp=document.createElement('input');
+inp.maxLength=1;
+cell.appendChild(inp);
+row.appendChild(cell);
+}
+grid.appendChild(row);
+}
+function solveSudoku(){alert('Basic solver placeholder');}
+</script>
+</body>
+</html>

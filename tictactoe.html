@@ -1,0 +1,48 @@
+!-- Tic Tac Toe -->
+<!DOCTYPE html>
+<html>
+<head>
+<title>Tic Tac Toe</title>
+<style>
+body { font-family: Arial; display:flex; justify-content:center; align-items:center; height:100vh; }
+.board { display:grid; grid-template-columns:repeat(3,100px); gap:5px; }
+.cell { width:100px; height:100px; background:#eee; display:flex; justify-content:center; align-items:center; font-size:2rem; cursor:pointer; }
+</style>
+</head>
+<body>
+<div class="board" id="board"></div>
+<script>
+let board = document.getElementById('board');
+let cells = Array(9).fill('');
+let turn = 'X';
+
+
+function check() {
+const wins = [ [0,1,2],[3,4,5],[6,7,8], [0,3,6],[1,4,7],[2,5,8], [0,4,8],[2,4,6] ];
+for (let w of wins) if (cells[w[0]] && cells[w[0]]===cells[w[1]] && cells[w[1]]===cells[w[2]]) return cells[w[0]];
+return cells.includes('') ? null : 'Draw';
+}
+
+
+function render() {
+board.innerHTML = '';
+cells.forEach((c,i)=>{
+let d=document.createElement('div');
+d.className='cell';
+d.textContent=c;
+d.onclick=()=>{
+if(!cells[i]){
+cells[i]=turn;
+turn = turn==='X'?'O':'X';
+let r=check();
+if(r){ alert(r==='Draw'?'Draw!':r+' wins!'); cells=Array(9).fill(''); }
+render();
+}
+}
+board.appendChild(d);
+})
+}
+render();
+</script>
+</body>
+</html>

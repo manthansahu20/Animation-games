@@ -1,48 +1,176 @@
-!-- Tic Tac Toe -->
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+<meta charset="UTF-8">
 <title>Tic Tac Toe</title>
+
 <style>
-body { font-family: Arial; display:flex; justify-content:center; align-items:center; height:100vh; }
-.board { display:grid; grid-template-columns:repeat(3,100px); gap:5px; }
-.cell { width:100px; height:100px; background:#eee; display:flex; justify-content:center; align-items:center; font-size:2rem; cursor:pointer; }
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:"Poppins", sans-serif;
+}
+
+body{
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background: radial-gradient(circle at top, #0d1224, #05060a);
+}
+
+.game-box{
+  text-align:center;
+  padding:25px;
+  background:rgba(255,255,255,0.05);
+  border-radius:25px;
+  backdrop-filter:blur(15px);
+  box-shadow:0px 0px 50px rgba(0,255,255,0.2),
+             inset 0 0 20px rgba(0,255,255,0.2);
+}
+
+.title{
+  margin-bottom:20px;
+  font-size:2.2rem;
+  font-weight:700;
+  color:#00eaff;
+  letter-spacing:4px;
+  text-shadow:0 0 20px #00eaff;
+}
+
+.board{
+  display:grid;
+  grid-template-columns:repeat(3,130px);
+  gap:12px;
+}
+
+.cell{
+  width:130px;
+  height:130px;
+  border-radius:20px;
+  background:rgba(255,255,255,0.08);
+  backdrop-filter:blur(6px);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  color:#00eaff;
+  font-size:3.5rem;
+  font-weight:600;
+  cursor:pointer;
+  box-shadow:inset 0 0 25px rgba(0,255,255,0.25);
+  transition:0.25s ease;
+  position:relative;
+  overflow:hidden;
+}
+
+/* Neon Hover Ripple */
+.cell::after{
+  content:"";
+  position:absolute;
+  width:0;
+  height:0;
+  border-radius:50%;
+  background:rgba(0,255,255,0.3);
+  transition:0.4s;
+}
+
+.cell:hover::after{
+  width:250px;
+  height:250px;
+}
+
+.cell:hover{
+  transform:scale(1.12);
+  box-shadow:0 0 25px rgba(0,255,255,0.5),
+             inset 0 0 20px rgba(0,255,255,0.35);
+}
+
+/* Reset Button */
+button{
+  margin-top:25px;
+  padding:12px 30px;
+  background:#00eaff;
+  border:none;
+  outline:none;
+  color:#000;
+  border-radius:12px;
+  font-size:1.1rem;
+  cursor:pointer;
+  font-weight:700;
+  box-shadow:0 0 20px #00eaff;
+  transition:0.3s ease;
+}
+
+button:hover{
+  transform:scale(1.15);
+  background:white;
+}
 </style>
 </head>
+
 <body>
-<div class="board" id="board"></div>
+
+<div class="game-box">
+  <div class="title">TIC TAC TOE</div>
+  <div class="board" id="board"></div>
+  <button onclick="resetGame()">RESET</button>
+</div>
+
 <script>
-let board = document.getElementById('board');
-let cells = Array(9).fill('');
-let turn = 'X';
+let board = document.getElementById("board");
+let cells = Array(9).fill("");
+let turn = "X";
 
-
-function check() {
-const wins = [ [0,1,2],[3,4,5],[6,7,8], [0,3,6],[1,4,7],[2,5,8], [0,4,8],[2,4,6] ];
-for (let w of wins) if (cells[w[0]] && cells[w[0]]===cells[w[1]] && cells[w[1]]===cells[w[2]]) return cells[w[0]];
-return cells.includes('') ? null : 'Draw';
+function check(){
+  let wins = [
+    [0,1,2],[3,4,5],[6,7,8],
+    [0,3,6],[1,4,7],[2,5,8],
+    [0,4,8],[2,4,6]
+  ];
+  for(let w of wins){
+    if(cells[w[0]] && cells[w[0]]===cells[w[1]] && cells[w[1]]===cells[w[2]])
+      return cells[w[0]];
+  }
+  return cells.includes("") ? null : "Draw";
 }
 
+function resetGame(){
+  cells = Array(9).fill("");
+  turn = "X";
+  render();
+}
 
-function render() {
-board.innerHTML = '';
-cells.forEach((c,i)=>{
-let d=document.createElement('div');
-d.className='cell';
-d.textContent=c;
-d.onclick=()=>{
-if(!cells[i]){
-cells[i]=turn;
-turn = turn==='X'?'O':'X';
-let r=check();
-if(r){ alert(r==='Draw'?'Draw!':r+' wins!'); cells=Array(9).fill(''); }
-render();
-}
-}
-board.appendChild(d);
-})
+function render(){
+  board.innerHTML = "";
+  cells.forEach((c,i)=>{
+    let d = document.createElement("div");
+    d.className = "cell";
+    d.textContent = c;
+
+    d.onclick = ()=>{
+      if(cells[i] !== "") return;
+
+      cells[i] = turn;
+      render();
+
+      let result = check();
+      if(result){
+        setTimeout(()=>{
+          alert(result === "Draw" ? "Match Draw!" : result + " Wins!");
+          resetGame();
+        },200);
+        return;
+      }
+
+      turn = turn === "X" ? "O" : "X";
+    };
+
+    board.appendChild(d);
+  });
 }
 render();
 </script>
+
 </body>
 </html>

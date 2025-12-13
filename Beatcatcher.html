@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Shape Catcher Game</title>
+<title>Shape Catcher Challenge</title>
 <style>
     body {
         margin: 0;
@@ -25,6 +25,7 @@
         display: block;
         margin: 20px auto;
         border-radius: 15px;
+        cursor: pointer;
     }
 
     .score-board {
@@ -44,11 +45,17 @@
     button:hover {
         background: #ff66ff;
     }
+
+    .game-over {
+        font-size: 30px;
+        color: red;
+        margin-top: 20px;
+    }
 </style>
 </head>
 <body>
 <div class="game-container">
-    <h1>🎯 Shape Catcher 🎯</h1>
+    <h1>🎯 Shape Catcher Challenge 🎯</h1>
     <div class="score-board">
         Score: <span id="score">0</span> | Combo: <span id="combo">0</span>
     </div>
@@ -56,6 +63,7 @@
     <div>
         <button id="startBtn">Start Game</button>
     </div>
+    <div class="game-over" id="gameOverText"></div>
 </div>
 
 <script>
@@ -66,12 +74,13 @@ canvas.height = 500;
 
 const scoreDisplay = document.getElementById('score');
 const comboDisplay = document.getElementById('combo');
+const gameOverText = document.getElementById('gameOverText');
 
 let score = 0;
 let combo = 0;
 let shapes = [];
 let gameStarted = false;
-let spawnInterval = 1500; // starting spawn speed in ms
+let spawnInterval = 1500; // starting spawn speed
 let spawnTimer = null;
 
 // Shape class
@@ -114,6 +123,13 @@ function drawShapes() {
     shapes.forEach(shape => shape.draw());
 }
 
+// End game
+function gameOver() {
+    gameStarted = false;
+    clearInterval(spawnTimer);
+    gameOverText.textContent = `Game Over! Final Score: ${score}`;
+}
+
 // Handle click/tap
 canvas.addEventListener('click', (e) => {
     if(!gameStarted) return;
@@ -133,8 +149,10 @@ canvas.addEventListener('click', (e) => {
             setTimeout(()=> shapes.splice(index,1),200);
         }
     });
-    if(!hitSomething) combo = 0;
-    comboDisplay.textContent = combo;
+
+    if(!hitSomething) {
+        gameOver();
+    }
 });
 
 // Game loop
@@ -163,13 +181,14 @@ document.getElementById('startBtn').addEventListener('click', () => {
     combo = 0;
     scoreDisplay.textContent = score;
     comboDisplay.textContent = combo;
+    gameOverText.textContent = '';
     gameStarted = true;
 
     // Initial spawn
     generateShape();
     spawnTimer = setInterval(generateShape, spawnInterval);
 
-    // Check every 500ms to adjust speed
+    // Adjust speed every 500ms
     setInterval(adjustSpawnSpeed, 500);
 
     gameLoop();

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Next-Level Flappy Bird</title>
+<style>
+  :root {--bg:#70c5ce;--ground:#d39c49;--accent:#ffd34d}
+  html,body{margin:0;height:100%;font-family:system-ui,sans-serif;background:linear-gradient(#b2f0f7,#70c5ce 40%)}
+  .wrap{display:flex;justify-content:center;align-items:center;height:100%;padding:20px;box-sizing:border-box}
+  .game-box{width:100%;max-width:560px;background:linear-gradient(#e9fefc,#d9f7f9);border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.12);overflow:hidden;position:relative}
+  canvas{display:block;width:100%;height:auto;background:transparent;cursor:pointer}
+  .hud{position:absolute;top:12px;left:12px;color:#1b3a3f;font-weight:700;text-shadow:0 1px 0 rgba(255,255,255,.6)}
+  .score{font-size:28px}
+  .best{font-size:12px;opacity:.85}
+  .overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;transition:opacity .3s ease}
+  .overlay.active{pointer-events:auto;opacity:1} 
+  .overlay.inactive{opacity:0}
+  .panel{pointer-events:auto;background:rgba(255,255,255,.96);padding:18px 22px;border-radius:10px;text-align:center;max-width:88%;box-shadow:0 6px 18px rgba(0,0,0,.12)}
+  .panel h1{margin:0 0 6px;font-size:20px}
+  .panel p{margin:6px 0;font-size:14px;color:#3b4b4d}
+  .btn{display:inline-block;margin-top:10px;padding:8px 12px;border-radius:8px;background:linear-gradient(#ffeb8a,#ffd34d);cursor:pointer;font-weight:700}
+  .ground-strip{height:28px;background:linear-gradient(#d5a24a,#c47c2a)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="game-box">
+    <canvas id="game" width="800" height="600"></canvas>
+    <div class="hud">
+      <div class="score">Score: <span id="score">0</span></div>
+      <div class="best">Best: <span id="best">0</span></div>
+    </div>
+    <div class="overlay active" id="overlay">
+      <div class="panel" id="panel">
+        <h1>Next-Level Flappy Bird</h1>
+        <p>Space / Click / Tap to flap. Survive as long as possible!</p>
+        <div style="display:flex;gap:8px;justify-content:center">
+          <div class="btn" id="startBtn">Start Game</div>
+          <div class="btn" id="instrBtn">Instructions</div>
+        </div>
+      </div>
+    </div>
+    <div class="ground-strip"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+const W=800,H=600;
+canvas.width=W;canvas.height=H;
+
+const scoreEl=document.getElementById('score');
+const bestEl=document.getElementById('best');
+const overlay=document.getElementById('overlay');
+const panel=document.getElementById('panel');
+const startBtn=document.getElementById('startBtn');
+const instrBtn=document.getElementById('instrBtn');
+
+let game=null;
+
+function randRange(a,b){return a + Math.random()*(b-a);}
+const groundHeight=28;
+const groundY=H-groundHeight;
+
+// Audio
+const audioCtx = window.AudioContext ? new AudioContext() : null;
+function playBeep(freq=440,dur=0.06,type='sine',vol=0.12){
+  if(!audioCtx) return;
+  const o=audioCtx.createOscillator();
+  const g=audioCtx.createGain();
+  o.type=type;o.frequency.value=freq;g.gain.value=vol;
+  o.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+dur);
+}
+
+// Particle for collision
+class Particle{
+  constructor(x,y,color){this.x=x;this.y=y;this.vx=randRange(-80,80);this.vy=randRange(-150,-50);this.alpha=1;this.color=color;}
+  update(dt){this.x+=this.vx*dt;this.y+=this.vy*dt;this.vy+=200*dt;this.alpha-=dt*1.5;}
+  draw(ctx){ctx.globalAlpha=Math.max(this.alpha,0);ctx.fillStyle=this.color;ctx.fillRect(this.x,this.y,3,3);ctx.globalAlpha=1;}
+}
+
+// Bird with wing animation
+class Bird{
+  constructor(){this.x=W*0.28;this.y=H/2;this.r=18;this.vel=0;this.acc=900;this.flapPower=-320;this.angle=0;this.dead=false;this.wingPhase=0;}
+  flap(){if(this.dead)return;this.vel=this.flapPower;playBeep(880,0.06);}
+  update(dt){this.vel+=this.acc*dt;this.y+=this.vel*dt;this.angle=Math.max(-0.8,Math.min(1.2,this.vel/500));
+    if(this.y+this.r>groundY){this.y=groundY-this.r;this.dead=true;}
+    if(this.y-this.r<0){this.y=this.r;this.vel=0;}
+    this.wingPhase+=dt*15;
+  }
+  draw(ctx){
+    ctx.save();ctx.translate(this.x,this.y);ctx.rotate(this.angle);
+    // body
+    ctx.beginPath();ctx.ellipse(0,0,this.r*1.3,this.r,0,0,Math.PI*2);ctx.fillStyle='#ffd34d';ctx.fill();ctx.closePath();
+    // wings flapping
+    ctx.beginPath();let wingY=Math.sin(this.wingPhase)*8;ctx.ellipse(-4,wingY,8,5,Math.PI/5,0,Math.PI*2);ctx.fillStyle='#ffbf3b';ctx.fill();ctx.closePath();
+    // eye
+    ctx.beginPath();ctx.arc(6,-4,3,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();ctx.closePath();
+    ctx.beginPath();ctx.arc(7,-4,1.6,0,Math.PI*2);ctx.fillStyle='#000';ctx.fill();ctx.closePath();
+    // beak
+    ctx.beginPath();ctx.moveTo(14,0);ctx.lineTo(22,4);ctx.lineTo(14,8);ctx.fillStyle='#ff8c00';ctx.fill();ctx.closePath();
+    ctx.restore();
+  }
+  getBounds(){return {left:this.x-this.r,right:this.x+this.r,top:this.y-this.r,bottom:this.y+this.r};}
+}
+
+// Pipe with slight animation
+class Pipe{
+  constructor(x,gapY,gapSize,speed){this.x=x;this.width=78;this.gapY=gapY;this.gapSize=gapSize;this.speed=speed;this.passed=false;}
+  update(dt){this.x-=this.speed*dt;}
+  draw(ctx){
+    ctx.fillStyle='#3aa37f';ctx.fillRect(this.x,0,this.width,this.gapY-this.gapSize/2);
+    ctx.fillRect(this.x,this.gapY+this.gapSize/2,this.width,H-(this.gapY+this.gapSize/2)-groundHeight);
+    ctx.fillStyle='#2b8b6b';ctx.fillRect(this.x-6,this.gapY-this.gapSize/2-10,this.width+12,10);
+    ctx.fillRect(this.x-6,this.gapY+this.gapSize/2,this.width+12,10);
+  }
+  getRects(){return [{left:this.x,right:this.x+this.width,top:0,bottom:this.gapY-this.gapSize/2},{left:this.x,right:this.x+this.width,top:this.gapY+this.gapSize/2,bottom:H-groundHeight}];}
+}
+
+// Background clouds
+let cloudOffset=0;
+function drawBackground(ctx){
+  cloudOffset+=0.25;
+  ctx.save();
+  ctx.fillStyle='rgba(255,255,255,0.9)';
+  for(let i=0;i<6;i++){
+    const x=(i*180-(cloudOffset*(0.3+i%2*0.1)))%(W+200)-80;
+    const y=60+(i%3)*20;
+    ctx.beginPath();ctx.ellipse(x,y,40,24,0,0,Math.PI*2);ctx.ellipse(x+30,y+6,30,18,0,0,Math.PI*2);ctx.fill();ctx.closePath();
+  }
+  ctx.restore();
+}
+
+// Game manager
+class Game{
+  constructor(){this.reset();}
+  reset(){
+    this.bird=new Bird();this.pipes=[];this.spawnTimer=0;this.spawnInterval=1.5;
+    this.pipeSpeed=200;this.score=0;this.running=false;this.gameover=false;this.particles=[];}
+  start(){this.reset();this.running=true;this.gameover=false;}
+  update(dt){
+    if(!this.running||this.gameover)return;
+    this.bird.update(dt);
+    this.spawnTimer+=dt;
+    if(this.spawnTimer>=this.spawnInterval){this.spawnTimer=0;const gapSize=randRange(Math.max(120,180-this.score*0.5),180-Math.min(50,this.score*0.5));const gapY=randRange(120,groundY-120);this.pipes.push(new Pipe(W+40,gapY,gapSize,this.pipeSpeed));}
+    for(let p of this.pipes)p.update(dt);
+    this.pipes=this.pipes.filter(p=>p.x+p.width>-40);
+    const brect=this.bird.getBounds();
+    for(let p of this.pipes){
+      if(!p.passed&&p.x+p.width<this.bird.x-this.bird.r){p.passed=true;this.score++;playBeep(600,0.05);this.spawnInterval=Math.max(0.9,1.5-0.01*this.score);}
+      for(let r of p.getRects()){if(rectIntersect(brect,r)){this.hit();}}
+    }
+    if(this.bird.dead&&!this.gameover)this.hit();
+    // update particles
+    this.particles=this.particles.filter(p=>p.alpha>0);
+    this.particles.forEach(p=>p.update(dt));
+  }
+  hit(){
+    this.gameover=true;this.running=false;playBeep(120,0.18,'square',0.22);
+    // spawn particles
+    for(let i=0;i<30;i++)this.particles.push(new Particle(this.bird.x,this.bird.y,'#ff4444'));
+  }
+  draw(ctx){
+    drawBackground(ctx);
+    for(let p of this.pipes)p.draw(ctx);
+    this.bird.draw(ctx);
+    for(let p of this.particles)p.draw(ctx);
+    ctx.fillStyle='#c47c2a';
+    ctx.fillRect(0,groundY,W,groundHeight);
+    for(let i=0;i<20;i++){ctx.fillStyle='rgba(0,0,0,0.03)';ctx.fillRect(i*40+(Date.now()/60%40),groundY,20,6);}
+  }
+}
+
+function rectIntersect(a,b){return !(a.right<b.left||a.left>b.right||a.bottom<b.top||a.top>b.bottom);}
+
+// Main loop
+let last=performance.now();
+function tick(now){
+  const dt=Math.min(0.03,(now-last)/1000);last=now;
+  if(game)game.update(dt);
+  ctx.clearRect(0,0,W,H);
+  if(game)game.draw(ctx);
+  if(game)scoreEl.textContent=game.score;
+  requestAnimationFrame(tick);
+}
+
+// Input
+function onAction(){if(!game.running&&!game.gameover){game.start();hideOverlay();}if(!game.gameover)game.bird.flap();if(game.gameover)showGameOver();}
+window.addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();onAction();}});
+canvas.addEventListener('mousedown',e=>{onAction();});
+canvas.addEventListener('touchstart',e=>{e.preventDefault();onAction();},{passive:false});
+
+function hideOverlay(){overlay.classList.remove('active');overlay.classList.add('inactive');}
+function showOverlay(){overlay.classList.remove('inactive');overlay.classList.add('active');}
+function showGameOver(){
+  panel.innerHTML=`<h1>Game Over</h1><p>Score: <strong>${game.score}</strong></p><div style="display:flex;gap:8px;justify-content:center;margin-top:8px"><div class='btn' id='restart'>Restart</div></div>`;
+  showOverlay();
+  const best=Math.max(getBest(),game.score);localStorage.setItem('flappy_best',best);bestEl.textContent=best;
+  document.getElementById('restart').addEventListener('click',()=>{panel.innerHTML=originalPanelHtml;hideOverlay();startNewGame();});
+}
+
+function startNewGame(){game=new Game();hideOverlay();let t=0;const countdown=setInterval(()=>{t++;if(t===1)playBeep(880,0.08);if(t>=2){clearInterval(countdown);game.start();}},250);}
+const originalPanelHtml=panel.innerHTML;
+startBtn.addEventListener('click',()=>{panel.innerHTML=`<h1>Ready?</h1><p>Click / Tap to flap and pass pipes.</p><div style="display:flex;gap:8px;justify-content:center"><div class='btn' id='go'>Go!</div></div>`;document.getElementById('go').addEventListener('click',()=>{panel.innerHTML=originalPanelHtml;startNewGame();});});
+instrBtn.addEventListener('click',()=>{panel.innerHTML=`<h1>Instructions</h1><p>- Space / Tap / Click to flap\n- Don't hit pipes or ground\n- Score increases on every pipe passed</p><div style="display:flex;gap:8px;justify-content:center"><div class='btn' id='back'>Back</div></div>`;document.getElementById('back').addEventListener('click',()=>{panel.innerHTML=originalPanelHtml;});});
+
+function getBest(){return parseInt(localStorage.getItem('flappy_best')||'0',10);}
+bestEl.textContent=getBest();
+game=new Game();
+requestAnimationFrame(tick);
+
+canvas.tabIndex=0;canvas.focus();
+function resumeAudio(){if(audioCtx&&audioCtx.state==='suspended')audioCtx.resume();}
+['mousedown','touchstart','keydown'].forEach(ev=>window.addEventListener(ev,resumeAudio,{once:true}));
+
+})();
+</script>
+</body>
+</html>

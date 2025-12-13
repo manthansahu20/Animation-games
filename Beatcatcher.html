@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shape Catcher Game</title>
+<style>
+    body {
+        margin: 0;
+        font-family: 'Arial', sans-serif;
+        background: #111;
+        color: #fff;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
+
+    .game-container {
+        text-align: center;
+    }
+
+    canvas {
+        background: #222;
+        display: block;
+        margin: 20px auto;
+        border-radius: 15px;
+    }
+
+    .score-board {
+        font-size: 20px;
+        margin-bottom: 10px;
+    }
+
+    button {
+        padding: 8px 12px;
+        font-size: 16px;
+        border-radius: 5px;
+        border: none;
+        cursor: pointer;
+        background: #ff00ff;
+        color: #fff;
+    }
+    button:hover {
+        background: #ff66ff;
+    }
+</style>
+</head>
+<body>
+<div class="game-container">
+    <h1>🎯 Shape Catcher 🎯</h1>
+    <div class="score-board">
+        Score: <span id="score">0</span> | Combo: <span id="combo">0</span>
+    </div>
+    <canvas id="gameCanvas"></canvas>
+    <div>
+        <button id="startBtn">Start Game</button>
+    </div>
+</div>
+
+<script>
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+canvas.width = 500;
+canvas.height = 500;
+
+const scoreDisplay = document.getElementById('score');
+const comboDisplay = document.getElementById('combo');
+
+let score = 0;
+let combo = 0;
+let shapes = [];
+let gameStarted = false;
+let spawnInterval = 1500; // starting spawn speed in ms
+let spawnTimer = null;
+
+// Shape class
+class Shape {
+    constructor(x, y, size, color) {
+        this.x = x;
+        this.y = y;
+        this.size = size;
+        this.color = color;
+        this.hit = false;
+    }
+
+    draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fillStyle = this.hit ? 'lime' : this.color;
+        ctx.fill();
+        ctx.closePath();
+    }
+
+    isClicked(mx, my) {
+        let dx = mx - this.x;
+        let dy = my - this.y;
+        return Math.sqrt(dx*dx + dy*dy) <= this.size;
+    }
+}
+
+// Generate random shape
+function generateShape() {
+    const x = Math.random() * (canvas.width - 60) + 30;
+    const y = Math.random() * (canvas.height - 60) + 30;
+    const size = Math.random() * 20 + 20;
+    const color = `hsl(${Math.random()*360}, 80%, 50%)`;
+    shapes.push(new Shape(x, y, size, color));
+}
+
+// Draw all shapes
+function drawShapes() {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    shapes.forEach(shape => shape.draw());
+}
+
+// Handle click/tap
+canvas.addEventListener('click', (e) => {
+    if(!gameStarted) return;
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+
+    let hitSomething = false;
+    shapes.forEach((shape, index) => {
+        if(!shape.hit && shape.isClicked(mx,my)) {
+            shape.hit = true;
+            hitSomething = true;
+            score += 10 + combo*2;
+            combo += 1;
+            scoreDisplay.textContent = score;
+            comboDisplay.textContent = combo;
+            setTimeout(()=> shapes.splice(index,1),200);
+        }
+    });
+    if(!hitSomething) combo = 0;
+    comboDisplay.textContent = combo;
+});
+
+// Game loop
+function gameLoop() {
+    if(!gameStarted) return;
+    drawShapes();
+    requestAnimationFrame(gameLoop);
+}
+
+// Adjust spawn speed based on score
+function adjustSpawnSpeed() {
+    if(score < 50) spawnInterval = 1500;
+    else if(score < 100) spawnInterval = 1200;
+    else if(score < 200) spawnInterval = 900;
+    else if(score < 400) spawnInterval = 700;
+    else spawnInterval = 500;
+
+    clearInterval(spawnTimer);
+    spawnTimer = setInterval(generateShape, spawnInterval);
+}
+
+// Start game
+document.getElementById('startBtn').addEventListener('click', () => {
+    shapes = [];
+    score = 0;
+    combo = 0;
+    scoreDisplay.textContent = score;
+    comboDisplay.textContent = combo;
+    gameStarted = true;
+
+    // Initial spawn
+    generateShape();
+    spawnTimer = setInterval(generateShape, spawnInterval);
+
+    // Check every 500ms to adjust speed
+    setInterval(adjustSpawnSpeed, 500);
+
+    gameLoop();
+});
+</script>
+</body>
+</html>

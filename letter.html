@@ -121,13 +121,15 @@ const message =
 "You are my favorite thought, my calm, and the reason my heart smiles. ❤️";
 
 let index = 0;
-let started = false;
+let typed = false;
 
 envelope.addEventListener("click", () => {
-  if(started) return;
-  started = true;
-  envelope.classList.add("open");
-  typeText();
+  envelope.classList.toggle("open");
+
+  if (!typed && envelope.classList.contains("open")) {
+    typed = true;
+    typeText();
+  }
 });
 
 function typeText(){

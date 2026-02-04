@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Love Letter 💖</title>
+
+<style>
+*{
+  margin:0; padding:0; box-sizing:border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+body{
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background: radial-gradient(circle at top, #ff9a9e, #fad0c4);
+}
+
+.container{
+  text-align:center;
+  color:#fff;
+}
+
+.title{
+  margin-bottom:20px;
+  text-shadow:0 4px 10px rgba(0,0,0,0.2);
+}
+
+.envelope{
+  width:320px;
+  height:210px;
+  background:#ff4d6d;
+  border-radius:12px;
+  margin:auto;
+  position:relative;
+  cursor:pointer;
+  box-shadow:0 25px 50px rgba(0,0,0,0.3);
+  transition:0.6s ease;
+}
+
+.flap{
+  position:absolute;
+  inset:0;
+  background:#ff1e56;
+  clip-path:polygon(0 0,50% 50%,100% 0);
+  transform-origin:top;
+  transition:0.6s ease;
+}
+
+.envelope.open .flap{
+  transform:rotateX(180deg);
+}
+
+.letter{
+  position:absolute;
+  width:90%;
+  height:85%;
+  background:#fff;
+  border-radius:10px;
+  top:10px;
+  left:5%;
+  padding:15px;
+  color:#333;
+  opacity:0;
+  transform:translateY(20px);
+  transition:0.6s ease;
+}
+
+.envelope.open .letter{
+  opacity:1;
+  transform:translateY(-40px);
+}
+
+.letter h2{
+  color:#ff1e56;
+  margin-bottom:10px;
+}
+
+.from{
+  display:block;
+  margin-top:15px;
+  font-size:14px;
+  color:#777;
+  text-align:right;
+}
+
+.hint{
+  margin-top:15px;
+  font-size:14px;
+  opacity:0.9;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <h1 class="title">💌 A Letter From My Heart</h1>
+
+  <div class="envelope" id="envelope">
+    <div class="flap"></div>
+    <div class="letter">
+      <h2>My Love ❤️</h2>
+      <p id="text"></p>
+      <span class="from">— Yours, Always</span>
+    </div>
+  </div>
+
+  <p class="hint">Tap the envelope 💗</p>
+</div>
+
+<script>
+const envelope = document.getElementById("envelope");
+const text = document.getElementById("text");
+
+const message =
+"You came into my life quietly, but changed everything forever. " +
+"You are my favorite thought, my calm, and the reason my heart smiles. ❤️";
+
+let index = 0;
+let started = false;
+
+envelope.addEventListener("click", () => {
+  if(started) return;
+  started = true;
+  envelope.classList.add("open");
+  typeText();
+});
+
+function typeText(){
+  if(index < message.length){
+    text.innerHTML += message.charAt(index);
+    index++;
+    setTimeout(typeText, 45);
+  }
+}
+</script>
+
+</body>
+</html>

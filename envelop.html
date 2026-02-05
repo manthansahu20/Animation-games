@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Grand Love Symphony</title>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Montserrat:wght@300;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        :root {
+            --primary: #ff2d55;
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #050505;
+            color: white;
+            font-family: 'Montserrat', sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* --- Animated Aura Background --- */
+        .aura {
+            position: fixed; top: 50%; left: 50%;
+            width: 600px; height: 600px;
+            background: radial-gradient(circle, rgba(255, 45, 85, 0.3) 0%, transparent 70%);
+            transform: translate(-50%, -50%);
+            filter: blur(80px);
+            z-index: 0;
+            animation: pulse 8s infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+            100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0.8; }
+        }
+
+        /* --- Gateway Section --- */
+        #gateway {
+            position: fixed; inset: 0; z-index: 100;
+            display: flex; align-items: center; justify-content: center;
+            background: #000; transition: 1.5s cubic-bezier(0.8, 0, 0.2, 1);
+        }
+        .premium-lock {
+            text-align: center; padding: 60px;
+            border-radius: 40px; background: var(--glass);
+            border: 1px solid var(--border); backdrop-filter: blur(30px);
+            box-shadow: 0 0 100px rgba(255, 45, 85, 0.1);
+        }
+        h1 { font-family: 'Great Vibes', cursive; font-size: 4.5rem; color: var(--primary); margin-bottom: 20px; }
+        input {
+            background: transparent; border: 1px solid var(--primary); padding: 15px 30px;
+            border-radius: 50px; color: white; width: 300px; text-align: center;
+            font-size: 1.1rem; margin-bottom: 30px; outline: none; transition: 0.4s;
+        }
+        input:focus { box-shadow: 0 0 20px var(--primary); }
+        .unlock-btn {
+            background: var(--primary); color: white; border: none; padding: 15px 60px;
+            border-radius: 50px; font-weight: bold; cursor: pointer; letter-spacing: 3px;
+            transition: 0.5s; box-shadow: 0 10px 30px rgba(255, 45, 85, 0.3);
+        }
+        .unlock-btn:hover { letter-spacing: 5px; transform: scale(1.05); }
+
+        /* --- Premium Music Player --- */
+        .music-player {
+            position: fixed; top: 30px; right: 30px;
+            background: var(--glass); padding: 15px 25px;
+            border-radius: 100px; border: 1px solid var(--border);
+            display: flex; align-items: center; gap: 15px;
+            backdrop-filter: blur(10px); z-index: 50;
+            display: none;
+        }
+        .visualizer-bar {
+            width: 4px; height: 20px; background: var(--primary);
+            animation: bounce 0.5s infinite alternate;
+        }
+
+        @keyframes bounce { 
+            0% { height: 5px; } 100% { height: 25px; } 
+        }
+
+        /* --- 3D Grand Envelope --- */
+        #mainExperience { display: none; perspective: 1500px; z-index: 10; }
+        
+        .envelope-container {
+            width: 450px; height: 300px; position: relative;
+            transform-style: preserve-3d; transition: transform 1s;
+        }
+
+        .envelope-body {
+            position: absolute; inset: 0; background: #222;
+            border-radius: 15px; border: 1px solid var(--border);
+            box-shadow: 0 50px 100px rgba(0,0,0,0.8);
+            z-index: 5;
+        }
+
+        .envelope-flap {
+            position: absolute; top: 0; left: 0; width: 100%; height: 50%;
+            background: #2a2a2a; border-radius: 15px 15px 0 0;
+            clip-path: polygon(0 0, 100% 0, 50% 100%);
+            transform-origin: top; z-index: 10; transition: 0.8s;
+        }
+
+        /* The Grand Letter */
+        .grand-letter {
+            position: absolute; bottom: 0; left: 5%; width: 90%; height: 90%;
+            background: #fff; color: #111; padding: 40px; border-radius: 10px;
+            z-index: 4; transform: translateY(0); transition: 1s cubic-bezier(0.6, 0, 0.2, 1);
+            overflow: hidden; box-shadow: 0 0 50px rgba(0,0,0,0.5);
+        }
+
+        .letter-text {
+            font-family: 'Great Vibes', cursive; font-size: 2.4rem;
+            color: #b91d47; line-height: 1.4; opacity: 0;
+        }
+
+        /* Animation States */
+        .envelope-container.open .envelope-flap { transform: rotateX(180deg); }
+        .envelope-container.open .grand-letter { transform: translateY(-300px) scale(1.2); z-index: 20; height: 500px; }
+
+        .hint {
+            position: fixed; bottom: 50px; text-transform: uppercase;
+            letter-spacing: 5px; opacity: 0.5; font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="aura"></div>
+    <canvas id="stars"></canvas>
+
+    <audio id="audioTrack" loop>
+        <source src="https://www.bensound.com/bensound-music/bensound-love.mp3" type="audio/mpeg">
+    </audio>
+
+    <div id="gateway">
+        <div class="premium-lock">
+            <h1>Manthan's Symphony</h1>
+            <p style="margin-bottom: 20px; opacity: 0.6;">Only for the most special person.</p>
+            <input type="password" id="pass" placeholder="Password: iloveyou">
+            <br>
+            <button class="unlock-btn" onclick="unseal()">UNSEAL THE HEART</button>
+        </div>
+    </div>
+
+    <div class="music-player" id="player">
+        <div class="visualizer-bar" style="animation-delay: 0.1s"></div>
+        <div class="visualizer-bar" style="animation-delay: 0.3s"></div>
+        <div class="visualizer-bar" style="animation-delay: 0.2s"></div>
+        <span style="font-size: 0.8rem; font-weight: 600;">PLAYING: ETERNAL LOVE</span>
+    </div>
+
+    <div id="mainExperience">
+        <div class="envelope-container" id="env" onclick="openMe()">
+            <div class="envelope-flap"></div>
+            <div class="envelope-body"></div>
+            <div class="grand-letter">
+                <div class="letter-text" id="finalText">
+                    My Dearest,<br><br>
+                    You are the algorithm that brought balance to my chaotic world. Every line of this code was written with a thought of you. <br><br>
+                    You are not just a part of my life, you are the entire experience.<br><br>
+                    Forever Yours. ❤️
+                </div>
+            </div>
+        </div>
+        <p class="hint" id="h">Click to Reveal the Secret</p>
+    </div>
+
+    <script>
+        // Star Background
+        const canvas = document.getElementById('stars');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+        let particles = [];
+        class P {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.s = Math.random() * 2;
+            }
+            draw() {
+                ctx.fillStyle = "white";
+                ctx.beginPath(); ctx.arc(this.x, this.y, this.s, 0, Math.PI*2); ctx.fill();
+            }
+        }
+        for(let i=0; i<150; i++) particles.push(new P());
+        function drawStars() {
+            ctx.clearRect(0,0,canvas.width, canvas.height);
+            particles.forEach(p => p.draw());
+            requestAnimationFrame(drawStars);
+        }
+        drawStars();
+
+        function unseal() {
+            const p = document.getElementById('pass').value.toLowerCase();
+            if(p === "iloveyou") {
+                document.getElementById('audioTrack').play();
+                gsap.to("#gateway", { y: -window.innerHeight, duration: 1.5, ease: "expo.inOut" });
+                setTimeout(() => {
+                    document.getElementById('mainExperience').style.display = "block";
+                    document.getElementById('player').style.display = "flex";
+                    gsap.from("#mainExperience", { opacity: 0, scale: 0.5, duration: 1 });
+                }, 1000);
+            } else {
+                gsap.to(".premium-lock", { x: -10, repeat: 5, yoyo: true, duration: 0.05 });
+            }
+        }
+
+        function openMe() {
+            document.getElementById('env').classList.add('open');
+            document.getElementById('h').style.display = 'none';
+            gsap.to(".letter-text", { opacity: 1, delay: 1, duration: 2 });
+            
+            // Grand Confetti Blast
+            setTimeout(() => {
+                confetti({
+                    particleCount: 200,
+                    spread: 90,
+                    origin: { y: 0.6 },
+                    colors: ['#ff2d55', '#ffffff', '#ffd1d1']
+                });
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

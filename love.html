@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Love Letter 💖</title>
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:"Poppins",sans-serif;
+}
+
+body{
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background:radial-gradient(circle at top,#ff9a9e,#fad0c4);
+  overflow:hidden;
+}
+
+.container{
+  text-align:center;
+  color:#fff;
+}
+
+.title{
+  margin-bottom:20px;
+  text-shadow:0 5px 20px rgba(0,0,0,.3);
+}
+
+/* Envelope */
+.envelope{
+  width:330px;
+  height:215px;
+  margin:auto;
+  position:relative;
+  cursor:pointer;
+  border-radius:16px;
+  background:#ff4d6d;
+  box-shadow:0 25px 50px rgba(0,0,0,.35);
+  transition:.6s ease;
+}
+
+.flap{
+  position:absolute;
+  inset:0;
+  background:#ff1e56;
+  clip-path:polygon(0 0,50% 55%,100% 0);
+  transform-origin:top;
+  transition:.7s ease;
+}
+
+.envelope.open .flap{
+  transform:rotateX(180deg);
+}
+
+/* Letter */
+.letter{
+  position:absolute;
+  width:90%;
+  height:85%;
+  background:#fff;
+  border-radius:12px;
+  top:12px;
+  left:5%;
+  padding:16px;
+  color:#333;
+  opacity:0;
+  transform:translateY(40px) scale(.95);
+  transition:.8s ease;
+  z-index:2;
+}
+
+.envelope.open .letter{
+  opacity:1;
+  transform:translateY(-60px) scale(1);
+}
+
+.letter h2{
+  color:#ff1e56;
+  margin-bottom:8px;
+}
+
+.from{
+  display:block;
+  margin-top:14px;
+  font-size:14px;
+  color:#777;
+  text-align:right;
+}
+
+/* Hearts burst */
+.heart{
+  position:absolute;
+  font-size:20px;
+  pointer-events:none;
+  animation:burst 1.5s ease forwards;
+}
+
+@keyframes burst{
+  0%{
+    transform:translate(0,0) scale(.5);
+    opacity:1;
+  }
+  100%{
+    transform:translate(var(--x),var(--y)) scale(1.6);
+    opacity:0;
+  }
+}
+
+.hint{
+  margin-top:16px;
+  font-size:14px;
+  opacity:.9;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <h1 class="title">💌 A Letter From My Heart</h1>
+
+  <div class="envelope" id="envelope">
+    <div class="flap"></div>
+
+    <div class="letter">
+      <h2>My Love ❤️</h2>
+      <p id="text"></p>
+      <span class="from">— Yours, Always</span>
+    </div>
+  </div>
+
+  <p class="hint">Tap the envelope 💗</p>
+</div>
+
+<script>
+const envelope=document.getElementById("envelope");
+const text=document.getElementById("text");
+
+const message=
+"You came into my life quietly, but changed everything forever.\n\n"+
+"You are my favorite thought, my calm, and the reason my heart smiles. ❤️";
+
+let index=0;
+let typing=false;
+
+envelope.addEventListener("click",()=>{
+  envelope.classList.toggle("open");
+
+  if(envelope.classList.contains("open")){
+    reset();
+    typeText();
+    heartBurst();
+  }else{
+    reset();
+  }
+});
+
+function reset(){
+  index=0;
+  text.innerHTML="";
+  typing=true;
+}
+
+function typeText(){
+  if(index<message.length && typing){
+    text.innerHTML+=message.charAt(index)==="\n"?"<br><br>":message.charAt(index);
+    index++;
+    setTimeout(typeText,45);
+  }
+}
+
+/* Heart explosion */
+function heartBurst(){
+  const rect=envelope.getBoundingClientRect();
+
+  for(let i=0;i<25;i++){
+    const heart=document.createElement("div");
+    heart.className="heart";
+    heart.innerHTML="💖";
+
+    heart.style.left=rect.width/2+"px";
+    heart.style.top=rect.height/2+"px";
+
+    heart.style.setProperty("--x",(Math.random()*300-150)+"px");
+    heart.style.setProperty("--y",(Math.random()*-300)+"px");
+
+    envelope.appendChild(heart);
+
+    setTimeout(()=>heart.remove(),1500);
+  }
+}
+</script>
+
+</body>
+</html>

@@ -1,210 +1,177 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Love Letter 💖</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Infinite Love Experience</title>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Montserrat:wght@300;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
-<style>
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family:Poppins,sans-serif;
-}
+    <style>
+        :root { --primary: #ff2d75; --accent: #ffd1d1; --bg: #0f0c29; }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: var(--bg); color: white; font-family: 'Montserrat', sans-serif; overflow: hidden; }
 
-body{
-  height:100vh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  background:radial-gradient(circle at top,#ff9a9e,#fad0c4);
-  overflow:hidden;
-}
+        /* Background Canvas for Animated Stars/Hearts */
+        #bgCanvas { position: fixed; inset: 0; z-index: 1; }
 
-.container{
-  text-align:center;
-  color:white;
-}
+        /* Phase 1: The Vault Entrance */
+        #gateway {
+            position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center;
+            background: radial-gradient(circle, #1b1b2f 0%, #000 100%);
+            transition: transform 1.2s cubic-bezier(1, 0, 0, 1);
+        }
+        .lock-container {
+            text-align: center; background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px); padding: 50px; border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 40px rgba(255, 45, 117, 0.3);
+        }
+        h1 { font-family: 'Great Vibes', cursive; font-size: 4.5rem; color: var(--primary); text-shadow: 0 0 20px rgba(255,45,117,0.5); }
+        .input-group { margin: 30px 0; }
+        input {
+            background: transparent; border: 2px solid var(--primary); padding: 15px; border-radius: 50px;
+            color: white; width: 280px; text-align: center; font-size: 1.2rem; outline: none; transition: 0.3s;
+        }
+        input:focus { box-shadow: 0 0 15px var(--primary); }
+        .btn-open {
+            background: var(--primary); color: white; border: none; padding: 15px 50px;
+            border-radius: 50px; font-weight: bold; cursor: pointer; letter-spacing: 2px; transition: 0.4s;
+        }
+        .btn-open:hover { transform: scale(1.1); box-shadow: 0 0 30px var(--primary); }
 
-.title{
-  margin-bottom:20px;
-}
-
-/* Envelope */
-.envelope{
-  width:320px;
-  height:210px;
-  background:#ff4d6d;
-  border-radius:14px;
-  position:relative;
-  cursor:pointer;
-  box-shadow:0 20px 40px rgba(0,0,0,.3);
-}
-
-/* Flap */
-.flap{
-  position:absolute;
-  inset:0;
-  background:#ff1e56;
-  clip-path:polygon(0 0,50% 55%,100% 0);
-  transform-origin:top;
-  transition:.6s ease;
-  z-index:3;
-}
-
-.envelope.open .flap{
-  transform:rotateX(180deg);
-}
-
-/* Letter */
-.letter{
-  position:absolute;
-  width:90%;
-  height:85%;
-  left:5%;
-  top:90px;                 /* hidden */
-  background:white;
-  border-radius:10px;
-  padding:14px;
-  transition:.8s ease;
-  z-index:2;
-  overflow:hidden;          /* 🔒 HARD STOP */
-}
-
-.envelope.open .letter{
-  top:-55px;                /* comes out */
-}
-
-.letter h3{
-  color:#ff1e56;
-  margin-bottom:6px;
-}
-
-/* Text area strictly inside paper */
-.text-box{
-  max-height:110px;
-  overflow:hidden;          /* 🔒 text never goes out */
-  font-size:14px;
-  color:#333;
-}
-
-.from{
-  font-size:12px;
-  color:#777;
-  margin-top:8px;
-  text-align:right;
-}
-
-/* Hearts */
-.hearts{
-  position:absolute;
-  bottom:8px;
-  left:50%;
-  transform:translateX(-50%);
-  pointer-events:none;
-}
-
-.heart{
-  position:absolute;
-  font-size:18px;
-  animation:rise 2s ease forwards;
-}
-
-@keyframes rise{
-  0%{ transform:translate(0,0) scale(.6); opacity:1;}
-  100%{ transform:translate(var(--x),-180px) scale(1.4); opacity:0;}
-}
-
-.hint{
-  margin-top:15px;
-  font-size:14px;
-}
-</style>
+        /* Phase 2: The Letter Experience */
+        #mainExperience {
+            display: none; height: 100vh; width: 100vw; position: relative;
+            z-index: 10; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .letter-wrap {
+            max-width: 700px; width: 90%; background: rgba(255, 255, 255, 0.95);
+            padding: 50px; border-radius: 2px; box-shadow: 0 30px 60px rgba(0,0,0,0.8);
+            position: relative; border-left: 10px solid var(--primary);
+        }
+        .content-text {
+            font-family: 'Great Vibes', cursive; font-size: 2.4rem; color: #333;
+            line-height: 1.4; text-align: center;
+        }
+        
+        /* Floating Elements */
+        .decoration { position: absolute; font-size: 3rem; pointer-events: none; opacity: 0; }
+    </style>
 </head>
-
 <body>
 
-<div class="container">
-  <h1 class="title">💌 A Letter From My Heart</h1>
+    <canvas id="bgCanvas"></canvas>
+    <audio id="loveAudio" loop><source src="https://www.bensound.com/bensound-music/bensound-love.mp3" type="audio/mpeg"></audio>
 
-  <div class="envelope" id="envelope">
-    <div class="flap"></div>
-
-    <div class="letter">
-      <h3>My Love ❤️</h3>
-
-      <div class="text-box" id="text"></div>
-
-      <div class="from">— Yours, Always</div>
-
-      <div class="hearts" id="hearts"></div>
+    <div id="gateway">
+        <div class="lock-container">
+            <h1>Secret Vault</h1>
+            <p style="opacity: 0.7;">An exclusive experience for you</p>
+            <div class="input-group">
+                <input type="password" id="passInput" placeholder="Enter 'iloveyou'">
+            </div>
+            <button class="btn-open" onclick="startApp()">UNLOCK MAGIC</button>
+        </div>
     </div>
-  </div>
 
-  <div class="hint">Tap the envelope 💗</div>
-</div>
+    <div id="mainExperience">
+        <div class="letter-wrap" id="letter">
+            <div class="content-text" id="typewriter"></div>
+        </div>
+        
+        <div class="decoration" id="d1">🌹</div>
+        <div class="decoration" id="d2">✨</div>
+        <div class="decoration" id="d3">💍</div>
+        <div class="decoration" id="d4">💖</div>
+    </div>
 
-<script>
-const envelope = document.getElementById("envelope");
-const textBox = document.getElementById("text");
-const heartsBox = document.getElementById("hearts");
+    <script>
+        // 1. Particle Background (Moving Stars)
+        const canvas = document.getElementById('bgCanvas');
+        const ctx = canvas.getContext('2d');
+        let dots = [];
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
 
-const message =
-"You came into my life quietly, but changed everything forever.\n\n"+
-"You are my calm, my favorite thought, and my forever. ❤️";
+        class Dot {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.r = Math.random() * 2;
+                this.v = Math.random() * 0.5;
+            }
+            update() { this.y -= this.v; if(this.y < 0) this.y = canvas.height; }
+            draw() {
+                ctx.fillStyle = "white";
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.r, 0, Math.PI*2);
+                ctx.fill();
+            }
+        }
 
-let i = 0;
-let typingTimer = null;
-let heartTimer = null;
+        for(let i=0; i<100; i++) dots.push(new Dot());
+        function animate() {
+            ctx.clearRect(0,0,canvas.width, canvas.height);
+            dots.forEach(d => { d.update(); d.draw(); });
+            requestAnimationFrame(animate);
+        }
+        animate();
 
-envelope.onclick = () => {
-  if(envelope.classList.contains("open")){
-    closeAll();
-  }else{
-    openAll();
-  }
-};
+        // 2. Unlock & Letter Logic
+        const loveNote = "Dear Love,\n\nIn a world full of variables, you are my only constant. Coding this for you was like writing my heart's algorithm. Every line of code, every pixel on this screen is a testament to how much I care about you. \n\nYou are my home. Forever.";
 
-function openAll(){
-  envelope.classList.add("open");
-  resetAll();
-  typeText();
-  startHearts();
-}
+        function startApp() {
+            const pass = document.getElementById('passInput').value.toLowerCase();
+            if(pass === "iloveyou") {
+                document.getElementById('loveAudio').play();
+                
+                // GSAP Animation for smooth transition
+                gsap.to("#gateway", { y: "-100%", duration: 1.5, ease: "expo.inOut" });
+                
+                setTimeout(() => {
+                    document.getElementById('mainExperience').style.display = "flex";
+                    startTyping();
+                    animateDecorations();
+                }, 1000);
+            } else {
+                gsap.to(".lock-container", { x: -10, repeat: 5, yoyo: true, duration: 0.05 });
+            }
+        }
 
-function closeAll(){
-  envelope.classList.remove("open");
-  resetAll();
-}
+        function startTyping() {
+            let i = 0;
+            const target = document.getElementById("typewriter");
+            function type() {
+                if (i < loveNote.length) {
+                    target.innerHTML += loveNote.charAt(i);
+                    i++;
+                    setTimeout(type, 70);
+                } else {
+                    // Final Celebration Blast
+                    confetti({ particleCount: 200, spread: 80, origin: { y: 0.7 } });
+                }
+            }
+            type();
+        }
 
-function resetAll(){
-  clearTimeout(typingTimer);
-  clearInterval(heartTimer);
-  i = 0;
-  textBox.innerHTML = "";
-  heartsBox.innerHTML = "";
-}
-
-function typeText(){
-  if(i < message.length){
-    textBox.innerHTML += message[i] === "\n" ? "<br><br>" : message[i];
-    i++;
-    typingTimer = setTimeout(typeText,40);
-  }
-}
-
-function startHearts(){
-  heartTimer = setInterval(()=>{
-    const h = document.createElement("div");
-    h.className = "heart";
-    h.innerHTML = "💖";
-    h.style.setProperty("--x",(Math.random()*100-50)+"px");
-    heartsBox.appendChild(h);
-    setTimeout(()=>h.remove(),2000);
-  },200);
-}
-</script>
-
+        function animateDecorations() {
+            const decos = ["#d1", "#d2", "#d3", "#d4"];
+            decos.forEach((id, index) => {
+                gsap.to(id, {
+                    opacity: 1,
+                    x: (Math.random() - 0.5) * 400,
+                    y: (Math.random() - 0.5) * 400,
+                    duration: 3,
+                    repeat: -1,
+                    yoyo: true,
+                    ease: "sine.inOut",
+                    delay: index * 0.5
+                });
+            });
+        }
+    </script>
 </body>
 </html>

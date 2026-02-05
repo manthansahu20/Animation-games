@@ -10,7 +10,7 @@
   margin:0;
   padding:0;
   box-sizing:border-box;
-  font-family:"Poppins",sans-serif;
+  font-family:Poppins,sans-serif;
 }
 
 body{
@@ -24,33 +24,32 @@ body{
 
 .container{
   text-align:center;
-  color:#fff;
+  color:white;
 }
 
 .title{
   margin-bottom:20px;
-  text-shadow:0 5px 20px rgba(0,0,0,.3);
 }
 
 /* Envelope */
 .envelope{
-  width:330px;
-  height:215px;
-  position:relative;
-  margin:auto;
-  cursor:pointer;
+  width:320px;
+  height:210px;
   background:#ff4d6d;
-  border-radius:16px;
-  box-shadow:0 25px 50px rgba(0,0,0,.35);
+  border-radius:14px;
+  position:relative;
+  cursor:pointer;
+  box-shadow:0 20px 40px rgba(0,0,0,.3);
 }
 
+/* Flap */
 .flap{
   position:absolute;
   inset:0;
   background:#ff1e56;
   clip-path:polygon(0 0,50% 55%,100% 0);
   transform-origin:top;
-  transition:.7s ease;
+  transition:.6s ease;
   z-index:3;
 }
 
@@ -58,47 +57,47 @@ body{
   transform:rotateX(180deg);
 }
 
-/* Letter (white paper) */
+/* Letter */
 .letter{
   position:absolute;
   width:90%;
   height:85%;
   left:5%;
-  top:85px;               /* fully inside envelope */
-  background:#fff;
-  border-radius:12px;
-  padding:16px;
-  transition:1s ease;
+  top:90px;                 /* hidden */
+  background:white;
+  border-radius:10px;
+  padding:14px;
+  transition:.8s ease;
   z-index:2;
-
-  overflow:hidden;        /* 🔴 text NEVER goes out */
+  overflow:hidden;          /* 🔒 HARD STOP */
 }
 
 .envelope.open .letter{
-  top:-60px;              /* slides out */
+  top:-55px;                /* comes out */
 }
 
-.letter h2{
+.letter h3{
   color:#ff1e56;
-  margin-bottom:8px;
+  margin-bottom:6px;
 }
 
-/* Text container (paper limit) */
-.letter-content{
-  max-height:115px;       /* fixed paper area */
-  overflow:hidden;        /* 🔴 strict boundary */
+/* Text area strictly inside paper */
+.text-box{
+  max-height:110px;
+  overflow:hidden;          /* 🔒 text never goes out */
+  font-size:14px;
+  color:#333;
 }
 
 .from{
-  display:block;
-  margin-top:12px;
-  font-size:14px;
+  font-size:12px;
   color:#777;
+  margin-top:8px;
   text-align:right;
 }
 
-/* Hearts from inside letter */
-.letter-hearts{
+/* Hearts */
+.hearts{
   position:absolute;
   bottom:8px;
   left:50%;
@@ -109,26 +108,17 @@ body{
 .heart{
   position:absolute;
   font-size:18px;
-  animation:floatUp 2.5s ease forwards;
-  opacity:0;
+  animation:rise 2s ease forwards;
 }
 
-@keyframes floatUp{
-  0%{
-    transform:translate(0,0) scale(.6);
-    opacity:0;
-  }
-  20%{ opacity:1; }
-  100%{
-    transform:translate(var(--x),-220px) scale(1.4);
-    opacity:0;
-  }
+@keyframes rise{
+  0%{ transform:translate(0,0) scale(.6); opacity:1;}
+  100%{ transform:translate(var(--x),-180px) scale(1.4); opacity:0;}
 }
 
 .hint{
-  margin-top:16px;
+  margin-top:15px;
   font-size:14px;
-  opacity:.9;
 }
 </style>
 </head>
@@ -142,78 +132,77 @@ body{
     <div class="flap"></div>
 
     <div class="letter">
-      <h2>My Love ❤️</h2>
+      <h3>My Love ❤️</h3>
 
-      <div class="letter-content">
-        <p id="text"></p>
-      </div>
+      <div class="text-box" id="text"></div>
 
-      <span class="from">— Yours, Always</span>
+      <div class="from">— Yours, Always</div>
 
-      <!-- hearts originate INSIDE letter -->
-      <div class="letter-hearts" id="heartBox"></div>
+      <div class="hearts" id="hearts"></div>
     </div>
   </div>
 
-  <p class="hint">Tap the envelope 💗</p>
+  <div class="hint">Tap the envelope 💗</div>
 </div>
 
 <script>
 const envelope = document.getElementById("envelope");
-const text = document.getElementById("text");
-const heartBox = document.getElementById("heartBox");
+const textBox = document.getElementById("text");
+const heartsBox = document.getElementById("hearts");
 
 const message =
 "You came into my life quietly, but changed everything forever.\n\n"+
-"You are my favorite thought, my calm, and the place my heart belongs. ❤️";
+"You are my calm, my favorite thought, and my forever. ❤️";
 
-let index = 0;
-let heartInterval;
+let i = 0;
+let typingTimer = null;
+let heartTimer = null;
 
-envelope.addEventListener("click", () => {
-  envelope.classList.toggle("open");
-
+envelope.onclick = () => {
   if(envelope.classList.contains("open")){
-    reset();
-    typeText();
-    startHearts();
+    closeAll();
   }else{
-    stopHearts();
-    reset();
+    openAll();
   }
-});
+};
 
-function reset(){
-  index = 0;
-  text.innerHTML = "";
+function openAll(){
+  envelope.classList.add("open");
+  resetAll();
+  typeText();
+  startHearts();
+}
+
+function closeAll(){
+  envelope.classList.remove("open");
+  resetAll();
+}
+
+function resetAll(){
+  clearTimeout(typingTimer);
+  clearInterval(heartTimer);
+  i = 0;
+  textBox.innerHTML = "";
+  heartsBox.innerHTML = "";
 }
 
 function typeText(){
-  if(index < message.length){
-    text.innerHTML += message.charAt(index)==="\n"
-      ? "<br><br>"
-      : message.charAt(index);
-    index++;
-    setTimeout(typeText,45);
+  if(i < message.length){
+    textBox.innerHTML += message[i] === "\n" ? "<br><br>" : message[i];
+    i++;
+    typingTimer = setTimeout(typeText,40);
   }
 }
 
-/* Hearts FOLLOW letter from inside */
 function startHearts(){
-  heartInterval = setInterval(()=>{
-    const heart = document.createElement("div");
-    heart.className = "heart";
-    heart.innerHTML = "💖";
-    heart.style.setProperty("--x",(Math.random()*120-60)+"px");
-    heartBox.appendChild(heart);
-
-    setTimeout(()=>heart.remove(),2500);
-  },150);
-}
-
-function stopHearts(){
-  clearInterval(heartInterval);
-  heartBox.innerHTML="";
+  heartTimer = setInterval(()=>{
+    const h = document.createElement("div");
+    h.className = "heart";
+    h.innerHTML = "💖";
+    h.style.setProperty("--x",(Math.random()*100-50)+"px");
+    heartsBox.appendChild(h);
+    setTimeout(()=>h.remove(),2000);
+  },200);
 }
 </script>
 

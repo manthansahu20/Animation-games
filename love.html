@@ -36,13 +36,12 @@ body{
 .envelope{
   width:330px;
   height:215px;
-  margin:auto;
   position:relative;
+  margin:auto;
   cursor:pointer;
-  border-radius:16px;
   background:#ff4d6d;
+  border-radius:16px;
   box-shadow:0 25px 50px rgba(0,0,0,.35);
-  transition:.6s ease;
 }
 
 .flap{
@@ -52,32 +51,31 @@ body{
   clip-path:polygon(0 0,50% 55%,100% 0);
   transform-origin:top;
   transition:.7s ease;
+  z-index:3;
 }
 
 .envelope.open .flap{
   transform:rotateX(180deg);
 }
 
-/* Letter */
+/* Letter (white paper) */
 .letter{
   position:absolute;
   width:90%;
   height:85%;
+  left:5%;
+  top:85px;               /* fully inside envelope */
   background:#fff;
   border-radius:12px;
-  top:12px;
-  left:5%;
   padding:16px;
-  color:#333;
-  opacity:0;
-  transform:translateY(40px) scale(.95);
-  transition:.8s ease;
+  transition:1s ease;
   z-index:2;
+
+  overflow:hidden;        /* 🔴 text NEVER goes out */
 }
 
 .envelope.open .letter{
-  opacity:1;
-  transform:translateY(-60px) scale(1);
+  top:-60px;              /* slides out */
 }
 
 .letter h2{
@@ -85,29 +83,44 @@ body{
   margin-bottom:8px;
 }
 
+/* Text container (paper limit) */
+.letter-content{
+  max-height:115px;       /* fixed paper area */
+  overflow:hidden;        /* 🔴 strict boundary */
+}
+
 .from{
   display:block;
-  margin-top:14px;
+  margin-top:12px;
   font-size:14px;
   color:#777;
   text-align:right;
 }
 
-/* Hearts burst */
-.heart{
+/* Hearts from inside letter */
+.letter-hearts{
   position:absolute;
-  font-size:20px;
+  bottom:8px;
+  left:50%;
+  transform:translateX(-50%);
   pointer-events:none;
-  animation:burst 1.5s ease forwards;
 }
 
-@keyframes burst{
+.heart{
+  position:absolute;
+  font-size:18px;
+  animation:floatUp 2.5s ease forwards;
+  opacity:0;
+}
+
+@keyframes floatUp{
   0%{
-    transform:translate(0,0) scale(.5);
-    opacity:1;
+    transform:translate(0,0) scale(.6);
+    opacity:0;
   }
+  20%{ opacity:1; }
   100%{
-    transform:translate(var(--x),var(--y)) scale(1.6);
+    transform:translate(var(--x),-220px) scale(1.4);
     opacity:0;
   }
 }
@@ -130,8 +143,15 @@ body{
 
     <div class="letter">
       <h2>My Love ❤️</h2>
-      <p id="text"></p>
+
+      <div class="letter-content">
+        <p id="text"></p>
+      </div>
+
       <span class="from">— Yours, Always</span>
+
+      <!-- hearts originate INSIDE letter -->
+      <div class="letter-hearts" id="heartBox"></div>
     </div>
   </div>
 
@@ -139,61 +159,61 @@ body{
 </div>
 
 <script>
-const envelope=document.getElementById("envelope");
-const text=document.getElementById("text");
+const envelope = document.getElementById("envelope");
+const text = document.getElementById("text");
+const heartBox = document.getElementById("heartBox");
 
-const message=
+const message =
 "You came into my life quietly, but changed everything forever.\n\n"+
-"You are my favorite thought, my calm, and the reason my heart smiles. ❤️";
+"You are my favorite thought, my calm, and the place my heart belongs. ❤️";
 
-let index=0;
-let typing=false;
+let index = 0;
+let heartInterval;
 
-envelope.addEventListener("click",()=>{
+envelope.addEventListener("click", () => {
   envelope.classList.toggle("open");
 
   if(envelope.classList.contains("open")){
     reset();
     typeText();
-    heartBurst();
+    startHearts();
   }else{
+    stopHearts();
     reset();
   }
 });
 
 function reset(){
-  index=0;
-  text.innerHTML="";
-  typing=true;
+  index = 0;
+  text.innerHTML = "";
 }
 
 function typeText(){
-  if(index<message.length && typing){
-    text.innerHTML+=message.charAt(index)==="\n"?"<br><br>":message.charAt(index);
+  if(index < message.length){
+    text.innerHTML += message.charAt(index)==="\n"
+      ? "<br><br>"
+      : message.charAt(index);
     index++;
     setTimeout(typeText,45);
   }
 }
 
-/* Heart explosion */
-function heartBurst(){
-  const rect=envelope.getBoundingClientRect();
+/* Hearts FOLLOW letter from inside */
+function startHearts(){
+  heartInterval = setInterval(()=>{
+    const heart = document.createElement("div");
+    heart.className = "heart";
+    heart.innerHTML = "💖";
+    heart.style.setProperty("--x",(Math.random()*120-60)+"px");
+    heartBox.appendChild(heart);
 
-  for(let i=0;i<25;i++){
-    const heart=document.createElement("div");
-    heart.className="heart";
-    heart.innerHTML="💖";
+    setTimeout(()=>heart.remove(),2500);
+  },150);
+}
 
-    heart.style.left=rect.width/2+"px";
-    heart.style.top=rect.height/2+"px";
-
-    heart.style.setProperty("--x",(Math.random()*300-150)+"px");
-    heart.style.setProperty("--y",(Math.random()*-300)+"px");
-
-    envelope.appendChild(heart);
-
-    setTimeout(()=>heart.remove(),1500);
-  }
+function stopHearts(){
+  clearInterval(heartInterval);
+  heartBox.innerHTML="";
 }
 </script>
 

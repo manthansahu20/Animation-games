@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Game Hub | Manthan Sahu</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<title>Manthan Game Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
 *{
@@ -15,45 +15,32 @@ font-family:'Poppins',sans-serif;
 }
 
 body{
-min-height:100vh;
 background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
-display:flex;
-flex-direction:column;
-align-items:center;
 color:white;
-overflow-x:hidden;
+min-height:100vh;
+padding:40px 20px;
 }
 
-header{
+h1{
 text-align:center;
-padding:50px 20px;
-}
-
-header h1{
 font-size:3rem;
+margin-bottom:40px;
 background:linear-gradient(90deg,#00f5ff,#00ff95);
 -webkit-background-clip:text;
 -webkit-text-fill-color:transparent;
-animation: glow 2s infinite alternate;
 }
 
-@keyframes glow{
-from{filter:drop-shadow(0 0 5px #00f5ff);}
-to{filter:drop-shadow(0 0 20px #00ff95);}
-}
-
-.container{
-width:90%;
-max-width:1300px;
+.grid{
 display:grid;
 grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
 gap:25px;
-padding-bottom:60px;
+max-width:1300px;
+margin:auto;
 }
 
 .card{
 background:rgba(255,255,255,0.1);
-backdrop-filter:blur(12px);
+backdrop-filter:blur(10px);
 border-radius:20px;
 padding:30px;
 text-align:center;
@@ -62,22 +49,16 @@ border:1px solid rgba(255,255,255,0.2);
 }
 
 .card:hover{
-transform:translateY(-12px) scale(1.05);
+transform:translateY(-10px) scale(1.05);
 box-shadow:0 20px 40px rgba(0,0,0,0.4);
 background:rgba(255,255,255,0.2);
 }
 
 .card h2{
-margin-bottom:10px;
+margin-bottom:15px;
 }
 
-.card p{
-font-size:14px;
-opacity:0.8;
-margin-bottom:20px;
-}
-
-.play-btn{
+.btn{
 display:inline-block;
 padding:10px 25px;
 border-radius:30px;
@@ -85,88 +66,80 @@ background:linear-gradient(90deg,#00f5ff,#00ff95);
 color:black;
 font-weight:600;
 text-decoration:none;
-transition:0.3s;
 }
 
-.play-btn:hover{
-transform:scale(1.1);
-}
-
-footer{
-margin:30px;
-opacity:0.6;
+.btn:hover{
+opacity:0.8;
 }
 </style>
 </head>
-
 <body>
 
-<header>
-<h1>🎮 Manthan's Game Hub</h1>
-<p>Select any game and start playing 🚀</p>
-</header>
+<h1>🎮 All Projects Hub</h1>
 
-<div class="container">
+<div class="grid">
 
 <div class="card">
 <h2>2048</h2>
-<p>Classic number merging puzzle game</p>
-<a href="2048.html" class="play-btn">Play</a>
+<a href="2048.html" class="btn">Open</a>
 </div>
 
 <div class="card">
 <h2>Advanced 2048</h2>
-<p>Improved UI & smooth gameplay</p>
-<a href="Advanced2048.html" class="play-btn">Play</a>
+<a href="Advanced2048.html" class="btn">Open</a>
 </div>
 
 <div class="card">
 <h2>Beat Catcher</h2>
-<p>Catch beats & score high</p>
-<a href="Beatcatcher.html" class="play-btn">Play</a>
+<a href="Beatcatcher.html" class="btn">Open</a>
+</div>
+
+<div class="card">
+<h2>Best Bird</h2>
+<a href="Bestbird.html" class="btn">Open</a>
 </div>
 
 <div class="card">
 <h2>Flappy Bird</h2>
-<p>Tap to fly & avoid obstacles</p>
-<a href="Flappybird2.html" class="play-btn">Play</a>
+<a href="Flappybird2.html" class="btn">Open</a>
 </div>
 
 <div class="card">
 <h2>Memory Game</h2>
-<p>Test your memory skills</p>
-<a href="memory.html" class="play-btn">Play</a>
+<a href="memory.html" class="btn">Open</a>
 </div>
 
 <div class="card">
 <h2>Sudoku</h2>
-<p>Classic logic puzzle challenge</p>
-<a href="sudoku.html" class="play-btn">Play</a>
+<a href="sudoku.html" class="btn">Open</a>
 </div>
 
 <div class="card">
 <h2>Tic Tac Toe</h2>
-<p>Play X vs O with smart logic</p>
-<a href="tictactoe.html" class="play-btn">Play</a>
+<a href="tictactoe.html" class="btn">Open</a>
+</div>
+
+<div class="card">
+<h2>Love Page</h2>
+<a href="love.html" class="btn">Open</a>
+</div>
+
+<div class="card">
+<h2>Letter Page</h2>
+<a href="letter.html" class="btn">Open</a>
+</div>
+
+<div class="card">
+<h2>Envelope Animation</h2>
+<a href="envelop.html" class="btn">Open</a>
 </div>
 
 <div class="card">
 <h2>Quiz App</h2>
-<p>Test your knowledge</p>
-<a href="Quiz App/index.html" class="play-btn">Play</a>
-</div>
-
-<div class="card">
-<h2>Love Letter Project</h2>
-<p>Animated envelope surprise</p>
-<a href="envelop.html" class="play-btn">Open</a>
+<a href="Quiz App/index.html" class="btn">Open</a>
 </div>
 
 </div>
-
-<footer>
-Made with ❤️ by Manthan Sahu
-</footer>
 
 </body>
 </html>
